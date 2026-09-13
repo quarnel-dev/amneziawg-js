@@ -1,0 +1,15 @@
+{
+  "name": "playground-basic",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "node index.ts"
+  },
+  "dependencies": {
+    "amneziawg": "file:../.."
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
