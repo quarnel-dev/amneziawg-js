@@ -9,3 +9,6 @@ console.log('Installed: ', inst)
 
 const keys = await awg.generateKeys()
 console.log('Keys: ', keys)
+
+const presharedKey = await awg.generatePresharedKey()
+console.log('PresharedKey: ', presharedKey)
