@@ -34,4 +34,9 @@ export class AmneziaWG {
     const publicKey = (await this.runAwgWithInput(['pubkey'], privateKey)).trim()
     return { privateKey, publicKey }
   }
+
+  async generatePresharedKey(): Promise<string> {
+    const key = await this.runAwg(['genpsk'])
+    return key.trim()
+  }
 }
