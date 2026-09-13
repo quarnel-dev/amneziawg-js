@@ -1,0 +1,1 @@
+export { AmneziaWG } from './AmneziaWG.js'
