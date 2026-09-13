@@ -31,7 +31,7 @@ export class AmneziaWG {
 
   async generateKeys(): Promise<KeyPair> {
     const privateKey = (await this.runAwg(['genkey'])).trim()
-    const publicKey = (await this.runAwgWithInput(['public'], privateKey)).trim()
+    const publicKey = (await this.runAwgWithInput(['pubkey'], privateKey)).trim()
     return { privateKey, publicKey }
   }
 }
