@@ -1,0 +1,41 @@
+{
+  "name": "amneziawg",
+  "version": "0.0.0",
+  "description": "Unofficial Node.js/TypeScript wrapper for AmneziaWG (awg / awg-quick CLI)",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Quarnel",
+  "license": "MIT",
+  "keywords": [
+    "amneziawg",
+    "wireguard",
+    "vpn",
+    "wg",
+    "awg"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quarnel-dev/amneziawg-js.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2"
+  }
+}
