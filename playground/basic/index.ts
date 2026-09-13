@@ -6,3 +6,6 @@ const awg = new AmneziaWG({
 
 const inst = await awg.isInstalled()
 console.log('Installed: ', inst)
+
+const keys = await awg.generateKeys()
+console.log('Keys: ', keys)
