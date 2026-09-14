@@ -20,11 +20,11 @@ export class AmneziaWG {
   }
 
   private assertKey(value: string, label: string): string {
-    const trimed = value.trim()
-    if (KEY_RE.test(trimed)) {
+    const trimmed = value.trim()
+    if (!KEY_RE.test(trimmed)) {
       throw new Error(`Invalid ${label}: expected base64-encoded 32-byte key`)
     }
-    return trimed
+    return trimmed
   }
 
   async isInstalled(): Promise<boolean> {
@@ -43,6 +43,6 @@ export class AmneziaWG {
   }
 
   async generatePresharedKey(): Promise<string> {
-    return this.assertKey(await this.runAwg(['genkey']), 'preshared key')
+    return this.assertKey(await this.runAwg(['genpsk']), 'preshared key')
   }
 }
