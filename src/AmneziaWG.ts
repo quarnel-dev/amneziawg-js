@@ -1,6 +1,7 @@
-import { execFileAsync, execWithInput } from './utils/exec.util.js'
+import { execFileAsync } from './utils/exec.util.js'
 
 import type { AmneziaWGOptions, KeyPair } from './types/index.js'
+import type { ExecOptions } from './types/exec.types.js'
 
 export class AmneziaWG {
   readonly interface: string
@@ -11,13 +12,9 @@ export class AmneziaWG {
     this.awgPath = options.awgPath
   }
 
-  private async runAwg(args: string[]): Promise<string> {
-    const { stdout } = await execFileAsync(this.awgPath ?? 'awg', args)
+  private async runAwg(args: string[], options: ExecOptions = {}): Promise<string> {
+    const { stdout } = await execFileAsync(this.awgPath ?? 'awg', args, options)
     return stdout
-  }
-
-  private async runAwgWithInput(args: string[], input: string): Promise<string> {
-    return execWithInput(this.awgPath ?? 'awg', args, input)
   }
 
   async isInstalled(): Promise<boolean> {
@@ -31,7 +28,7 @@ export class AmneziaWG {
 
   async generateKeys(): Promise<KeyPair> {
     const privateKey = (await this.runAwg(['genkey'])).trim()
-    const publicKey = (await this.runAwgWithInput(['pubkey'], `${privateKey}\n`)).trim()
+    const publicKey = (await this.runAwg(['pubkey'], { input: `${privateKey}\n` })).trim()
     return { privateKey, publicKey }
   }
 

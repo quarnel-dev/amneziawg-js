@@ -1,31 +1,54 @@
-import { execFile, spawn } from 'node:child_process'
+import { execFile, type ExecFileOptions } from 'node:child_process'
 import { promisify } from 'node:util'
 
-export const execFileAsync = promisify(execFile)
+import { ExecError } from '../errors/ExecError.error.js'
+import { DEFAULT_MAX_BUFFER_BYTES, DEFAULT_TIMEOUT_MS } from './exec.constants.js'
 
-export function execWithInput(command: string, args: string[], input: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args)
-    let stdout = ''
-    let stderr = ''
+import type { ExecOptions, ExecResult } from '../types/exec.types.js'
 
-    child.stdout.on('data', (chunk) => {
-      stdout += chunk
-    })
-    child.stderr.on('data', (chunk) => {
-      stderr += chunk
-    })
+type ExecFileOptionsWithInput = ExecFileOptions & { input?: string }
 
-    child.on('error', reject)
-    child.on('close', (code) => {
-      if (code === 0) {
-        resolve(stdout)
-      } else {
-        reject(new Error(`${command} exited with code ${code}: ${stderr}`))
-      }
-    })
+const execFileAsyncRaw = promisify(execFile)
 
-    child.stdin.write(input)
-    child.stdin.end()
+export async function execFileAsync(command: string, args: readonly string[], options: ExecOptions = {}): Promise<ExecResult> {
+  const execOptions: ExecFileOptionsWithInput = {
+    timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    maxBuffer: options.maxBufferBytes ?? DEFAULT_MAX_BUFFER_BYTES,
+    windowsHide: true
+  }
+  if (options.input !== undefined) {
+    execOptions.input = options.input
+  }
+
+  try {
+    const { stdout, stderr } = await execFileAsyncRaw(command, [...args], execOptions)
+    return {
+      stdout: bufferToString(stdout),
+      stderr: bufferToString(stderr),
+    }
+  } catch (err) {
+    throw toExecError(command, args, err)
+  }
+}
+
+function toExecError(command: string, args: readonly string[], err: unknown): ExecError {
+  const e = err as {
+    code?: number | string
+    stdout?: string | Buffer
+    stderr?: string | Buffer
+  }
+  const exitCode = typeof e.code === 'number' ? e.code : null
+  return new ExecError({
+    command,
+    args,
+    exitCode,
+    stdout: bufferToString(e.stdout),
+    stderr: bufferToString(e.stderr),
+    cause: err,
   })
+}
+
+function bufferToString(value: string | Buffer | undefined): string {
+  if (value === undefined) return ''
+  return typeof value === 'string' ? value : value.toString('utf8')
 }
