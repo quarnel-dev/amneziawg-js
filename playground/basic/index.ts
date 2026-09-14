@@ -1,4 +1,4 @@
-import { AmneziaWG } from 'amneziawg'
+import { AmneziaWG, PeerAlreadyExistsError, PeerNotFoundError } from 'amneziawg'
 
 async function main() {
   console.log('Starting AmneziaWG playground testing...')
@@ -45,24 +45,48 @@ async function main() {
     console.log('Generated test peer public key:', testPeerKeys.publicKey)
 
     console.log('Adding test peer to the interface...')
-    await awg.addPeer({
+    const addedPeer = await awg.addPeer({
       publicKey: testPeerKeys.publicKey,
       allowedIps: ['10.9.0.100/32'],
-      advancedSecurity: 'on'
+      advancedSecurity: 'on',
     })
-    console.log('Peer added successfully.')
+    console.log('Peer added successfully, returned status:')
+    console.dir(addedPeer, { depth: null, colors: true })
 
-    const peersAfterAdd = await awg.getPeers()
-    const addedPeerExists = peersAfterAdd.some((p) => p.publicKey === testPeerKeys.publicKey)
-    console.log('Is new peer present in status dump?:', addedPeerExists)
+    console.log('\n--- Testing PeerAlreadyExistsError ---')
+    try {
+      await awg.addPeer({
+        publicKey: testPeerKeys.publicKey,
+        allowedIps: ['10.9.0.101/32'],
+      })
+      console.error('ERROR: expected PeerAlreadyExistsError was not thrown!')
+    } catch (error) {
+      if (error instanceof PeerAlreadyExistsError) {
+        console.log('Correctly caught PeerAlreadyExistsError:', error.message)
+      } else {
+        throw error
+      }
+    }
 
-    console.log('Removing test peer from the interface...')
+    console.log('\nRemoving test peer from the interface...')
     await awg.removePeer(testPeerKeys.publicKey)
     console.log('Peer removed successfully.')
 
     const peersAfterRemove = await awg.getPeers()
     const removedPeerExists = peersAfterRemove.some((p) => p.publicKey === testPeerKeys.publicKey)
     console.log('Is peer successfully cleaned up?:', !removedPeerExists)
+
+    console.log('\n--- Testing PeerNotFoundError ---')
+    try {
+      await awg.removePeer(testPeerKeys.publicKey)
+      console.error('ERROR: expected PeerNotFoundError was not thrown!')
+    } catch (error) {
+      if (error instanceof PeerNotFoundError) {
+        console.log('Correctly caught PeerNotFoundError:', error.message)
+      } else {
+        throw error
+      }
+    }
   } catch (error) {
     console.error('Failed to read device dump data:', error)
   }

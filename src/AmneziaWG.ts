@@ -1,6 +1,6 @@
 import { execFileAsync } from './utils/exec.util.js'
 import { parseAwgDump } from './utils/parser.utils.js'
-import { InvalidKeyError, PeerAlreadyExistsError, PeerNotFoundError } from './errors/index.js'
+import { AmneziaWGError, InvalidKeyError, PeerAlreadyExistsError, PeerNotFoundError } from './errors/index.js'
 
 import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus, AddPeerOptions } from './types/index.js'
 import type { ExecOptions } from './types/exec.types.js'
@@ -63,7 +63,7 @@ export class AmneziaWG {
     return status.peers.find((peer) => peer.publicKey === publicKey) ?? null
   }
 
-  async addPeer(options: AddPeerOptions): Promise<void> {
+  async addPeer(options: AddPeerOptions): Promise<PeerStatus> {
     const peerKey = this.assertKey(options.publicKey, 'peer public key')
     const args = ['set', this.interface, 'peer', peerKey]
 
@@ -91,6 +91,11 @@ export class AmneziaWG {
     }
 
     await this.runAwg(args)
+
+    const created = await this.getPeer(peerKey)
+    if (!created) throw new AmneziaWGError('Peer was added but could not be found afterwards')
+
+    return created
   }
 
   async removePeer(publicKey: string): Promise<void> {
