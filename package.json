@@ -1,6 +1,6 @@
 {
   "name": "amneziawg",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Unofficial Node.js/TypeScript wrapper for AmneziaWG (awg / awg-quick CLI)",
   "type": "module",
   "scripts": {
