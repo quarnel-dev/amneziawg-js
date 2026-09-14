@@ -1,7 +1,9 @@
 import type { InterfaceStatus, PeerStatus } from '../types/index.js'
 
 function parseNullable(value: string | undefined): string | null {
-  if (value === undefined || value === '(null)' || value === '(none)') return null
+  if (value === undefined || value === '(null)' || value === '(none)' || value === 'off') {
+    return null
+  }
   return value
 }
 
@@ -43,6 +45,7 @@ function parseInterfaceLine(fields: string[], hasInterfaceName: boolean): Omit<I
     maxHandshakeAttempts,
     randomTrailers,
     disableCookies,
+    headerProtectionKey,
   ] = fields.slice(offset)
 
   if (privateKey === undefined || publicKey === undefined || listenPort === undefined)
@@ -84,6 +87,7 @@ function parseInterfaceLine(fields: string[], hasInterfaceName: boolean): Omit<I
     },
     randomTrailers: randomTrailers === 'on',
     disableCookies: disableCookies === 'on',
+    headerProtectionKey: parseNullable(headerProtectionKey),
   }
 }
 
@@ -127,11 +131,11 @@ export function parseAwgDump(dump: string, fallbackInterface?: string): Interfac
 
   const firstLine = lines[0]!
   const firstFields = firstLine.split('\t')
-  
+
   const hasInterfaceName = firstFields.length > 20 && !firstFields[0]!.match(/^[A-Za-z0-9+/]{43}=$/)
 
   const interfaceStatus = parseInterfaceLine(firstFields, hasInterfaceName)
-  
+
   if (!interfaceStatus.interface && fallbackInterface) {
     interfaceStatus.interface = fallbackInterface
   }

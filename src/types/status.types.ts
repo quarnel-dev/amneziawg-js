@@ -28,6 +28,7 @@ export interface InterfaceStatus {
   timings: InterfaceTimings
   randomTrailers: boolean
   disableCookies: boolean
+  headerProtectionKey: string | null
   peers: PeerStatus[]
 }
 
