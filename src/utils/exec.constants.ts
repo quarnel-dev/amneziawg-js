@@ -1,0 +1,2 @@
+export const DEFAULT_TIMEOUT_MS = 10000
+export const DEFAULT_MAX_BUFFER_BYTES = 10 * 1024 * 1024
