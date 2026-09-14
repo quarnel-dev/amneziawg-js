@@ -3,6 +3,8 @@ import { execFileAsync } from './utils/exec.util.js'
 import type { AmneziaWGOptions, KeyPair } from './types/index.js'
 import type { ExecOptions } from './types/exec.types.js'
 
+const KEY_RE = /^[A-Za-z0-9+/]{43}=$/
+
 export class AmneziaWG {
   readonly interface: string
   readonly awgPath?: string | undefined
@@ -17,6 +19,14 @@ export class AmneziaWG {
     return stdout
   }
 
+  private assertKey(value: string, label: string): string {
+    const trimed = value.trim()
+    if (KEY_RE.test(trimed)) {
+      throw new Error(`Invalid ${label}: expected base64-encoded 32-byte key`)
+    }
+    return trimed
+  }
+
   async isInstalled(): Promise<boolean> {
     try {
       await this.runAwg(['--version'])
@@ -27,13 +37,12 @@ export class AmneziaWG {
   }
 
   async generateKeys(): Promise<KeyPair> {
-    const privateKey = (await this.runAwg(['genkey'])).trim()
-    const publicKey = (await this.runAwg(['pubkey'], { input: `${privateKey}\n` })).trim()
+    const privateKey = this.assertKey(await this.runAwg(['genkey']), 'private key')
+    const publicKey = this.assertKey(await this.runAwg(['pubkey'], { input: `${privateKey}\n` }), 'public key')
     return { privateKey, publicKey }
   }
 
   async generatePresharedKey(): Promise<string> {
-    const key = await this.runAwg(['genpsk'])
-    return key.trim()
+    return this.assertKey(await this.runAwg(['genkey']), 'preshared key')
   }
 }
