@@ -3,6 +3,9 @@ node_modules/
 dist/
 
 .vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 *.log
 npm-debug.log*
