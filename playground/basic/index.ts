@@ -48,9 +48,7 @@ async function main() {
     await awg.addPeer({
       publicKey: testPeerKeys.publicKey,
       allowedIps: ['10.9.0.100/32'],
-      jc: 5,
-      jmin: 30,
-      jmax: 60,
+      advancedSecurity: 'on'
     })
     console.log('Peer added successfully.')
 
