@@ -1,7 +1,7 @@
 import { execFileAsync } from './utils/exec.util.js'
 import { parseAwgDump } from './utils/parser.utils.js'
 
-import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus } from './types/index.js'
+import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus, AddPeerOptions } from './types/index.js'
 import type { ExecOptions } from './types/exec.types.js'
 
 const KEY_RE = /^[A-Za-z0-9+/]{43}=$/
@@ -60,5 +60,37 @@ export class AmneziaWG {
   async getPeer(publicKey: string): Promise<PeerStatus | null> {
     const status = await this.getStatus()
     return status.peers.find((peer) => peer.publicKey === publicKey) ?? null
+  }
+
+  async addPeer(options: AddPeerOptions): Promise<void> {
+    const peerKey = this.assertKey(options.publicKey, 'peer public key')
+    const args = ['set', this.interface, 'peer', peerKey]
+
+    if (options.presharedKey !== undefined) {
+      args.push('preshared-key', options.presharedKey === null ? 'none' : this.assertKey(options.presharedKey, 'preshared key'))
+    }
+
+    if (options.endpoint) {
+      args.push('endpoint', options.endpoint)
+    }
+
+    if (options.persistentKeepalive !== undefined) {
+      args.push('persistent-keepalive', String(options.persistentKeepalive))
+    }
+
+    if (options.allowedIps) {
+      args.push('allowed-ips', options.allowedIps.length === 0 ? 'none' : options.allowedIps.join(','))
+    }
+
+    if (options.jc !== undefined) args.push('jc', String(options.jc))
+    if (options.jmin !== undefined) args.push('jmin', String(options.jmin))
+    if (options.jmax !== undefined) args.push('jmax', String(options.jmax))
+
+    await this.runAwg(args)
+  }
+
+  async removePeer(publicKey: string): Promise<void> {
+    const peerKey = this.assertKey(publicKey, 'peer public key')
+    await this.runAwg(['set', this.interface, 'peer', peerKey, 'remove'])
   }
 }

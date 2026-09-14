@@ -5,8 +5,11 @@ export interface AmneziaWGOptions {
 
 export interface AddPeerOptions {
   publicKey: string
-  presharedKey?: string
-  allowedIps: string[]
+  presharedKey?: string | null
   endpoint?: string
-  persistentKeepalive?: number
+  persistentKeepalive?: number | 'off'
+  allowedIps?: string[]
+  jc?: number
+  jmin?: number
+  jmax?: number
 }
