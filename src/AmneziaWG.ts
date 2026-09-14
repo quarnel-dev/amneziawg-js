@@ -1,5 +1,6 @@
 import { execFileAsync } from './utils/exec.util.js'
 import { parseAwgDump } from './utils/parser.utils.js'
+import { InvalidKeyError, PeerAlreadyExistsError, PeerNotFoundError } from './errors/index.js'
 
 import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus, AddPeerOptions } from './types/index.js'
 import type { ExecOptions } from './types/exec.types.js'
@@ -23,7 +24,7 @@ export class AmneziaWG {
   private assertKey(value: string, label: string): string {
     const trimmed = value.trim()
     if (!KEY_RE.test(trimmed)) {
-      throw new Error(`Invalid ${label}: expected base64-encoded 32-byte key`)
+      throw new InvalidKeyError(label)
     }
     return trimmed
   }
@@ -66,6 +67,9 @@ export class AmneziaWG {
     const peerKey = this.assertKey(options.publicKey, 'peer public key')
     const args = ['set', this.interface, 'peer', peerKey]
 
+    const existing = await this.getPeer(peerKey)
+    if (existing) throw new PeerAlreadyExistsError(peerKey)
+
     if (options.presharedKey !== undefined) {
       args.push('preshared-key', options.presharedKey === null ? 'none' : this.assertKey(options.presharedKey, 'preshared key'))
     }
@@ -91,6 +95,10 @@ export class AmneziaWG {
 
   async removePeer(publicKey: string): Promise<void> {
     const peerKey = this.assertKey(publicKey, 'peer public key')
+
+    const existing = await this.getPeer(peerKey)
+    if (!existing) throw new PeerNotFoundError(peerKey)
+
     await this.runAwg(['set', this.interface, 'peer', peerKey, 'remove'])
   }
 }
