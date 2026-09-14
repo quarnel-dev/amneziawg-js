@@ -82,9 +82,15 @@ export class AmneziaWG {
       args.push('allowed-ips', options.allowedIps.length === 0 ? 'none' : options.allowedIps.join(','))
     }
 
-    if (options.jc !== undefined) args.push('jc', String(options.jc))
-    if (options.jmin !== undefined) args.push('jmin', String(options.jmin))
-    if (options.jmax !== undefined) args.push('jmax', String(options.jmax))
+    const hasJunkParams = options.jc !== undefined || options.jmin !== undefined || options.jmax !== undefined
+
+    if (hasJunkParams) {
+      const jc = options.jc ?? 4
+      const jmin = options.jmin ?? 40
+      const jmax = options.jmax ?? 70
+
+      args.push('advanced-security', `on:${jc}:${jmin}:${jmax}`)
+    }
 
     await this.runAwg(args)
   }
