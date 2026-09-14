@@ -9,7 +9,5 @@ export interface AddPeerOptions {
   endpoint?: string
   persistentKeepalive?: number | 'off'
   allowedIps?: string[]
-  jc?: number
-  jmin?: number
-  jmax?: number
+  advancedSecurity?: 'on' | 'off'
 }
