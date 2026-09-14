@@ -121,17 +121,21 @@ function parsePeerLine(fields: string[], hasInterfaceName: boolean): PeerStatus 
   }
 }
 
-export function parseAwgDump(dump: string): InterfaceStatus {
+export function parseAwgDump(dump: string, fallbackInterface?: string): InterfaceStatus {
   const lines = dump.trim().split('\n').filter(Boolean)
   if (lines.length === 0) throw new Error('Empty awg dump output')
 
   const firstLine = lines[0]!
   const firstFields = firstLine.split('\t')
-  // when called as `awg show <iface> dump`, there's no interface-name column.
-  // when called as `awg show all dump`, every line is prefixed with it.
+  
   const hasInterfaceName = firstFields.length > 20 && !firstFields[0]!.match(/^[A-Za-z0-9+/]{43}=$/)
 
   const interfaceStatus = parseInterfaceLine(firstFields, hasInterfaceName)
+  
+  if (!interfaceStatus.interface && fallbackInterface) {
+    interfaceStatus.interface = fallbackInterface
+  }
+
   const peers = lines.splice(1).map((line) => parsePeerLine(line.split('\t'), hasInterfaceName))
 
   return { ...interfaceStatus, peers }

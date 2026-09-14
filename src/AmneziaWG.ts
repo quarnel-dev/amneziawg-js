@@ -49,7 +49,7 @@ export class AmneziaWG {
 
   async getStatus(): Promise<InterfaceStatus> {
     const dump = await this.runAwg(['show', this.interface, 'dump'])
-    return parseAwgDump(dump)
+    return parseAwgDump(dump, this.interface)
   }
 
   async getPeers(): Promise<PeerStatus[]> {
