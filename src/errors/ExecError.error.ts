@@ -1,4 +1,6 @@
-export class ExecError extends Error {
+import { AmneziaWGError } from './AmneziaWGError.error.js'
+
+export class ExecError extends AmneziaWGError {
   readonly command: string
   readonly args: readonly string[]
   readonly exitCode: number | null
@@ -15,7 +17,7 @@ export class ExecError extends Error {
   }) {
     const { command, args, exitCode, stdout, stderr, cause } = params
     const label = `${command} ${args.join(' ')}`.trim()
-    const reason = stderr.trim() || 'unknow error'
+    const reason = stderr.trim() || 'unknown error'
 
     super(exitCode === null ? `${label} failed: ${reason}` : `${label} exited with code ${exitCode}: ${reason}`)
 

@@ -1,0 +1,5 @@
+export { AmneziaWGError } from './AmneziaWGError.error.js'
+export { ExecError } from './ExecError.error.js'
+export { InvalidKeyError } from './InvalidKeyError.error.js'
+export { PeerAlreadyExistsError } from './PeerAlreadyExistsError.error.js'
+export { PeerNotFoundError } from './PeerNotFoundError.error.js'

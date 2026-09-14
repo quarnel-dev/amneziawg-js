@@ -1,3 +1,3 @@
 export { AmneziaWG } from './AmneziaWG.js'
 
-export { ExecError } from './errors/ExecError.error.js'
+export { AmneziaWGError, ExecError, InvalidKeyError, PeerAlreadyExistsError, PeerNotFoundError } from './errors/index.js'
