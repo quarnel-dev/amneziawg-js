@@ -1,5 +1,5 @@
 import { execFileAsync } from './utils/exec.util.js'
-import { parseAwgDump } from './utils/parser.utils.js'
+import { parseAwgDump } from './utils/parser.util.js'
 import { AmneziaWGError, InvalidKeyError, PeerAlreadyExistsError, PeerNotFoundError } from './errors/index.js'
 
 import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus, AddPeerOptions } from './types/index.js'

@@ -110,7 +110,7 @@ function parsePeerLine(fields: string[], hasInterfaceName: boolean): PeerStatus 
   const persistentKeepalive = peerFields[7]
 
   const handshakeUnix = Number(latestHandshake ?? 0)
-
+  
   return {
     publicKey,
     presharedKey: parseNullable(presharedKey),
