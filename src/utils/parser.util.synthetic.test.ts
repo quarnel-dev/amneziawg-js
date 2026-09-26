@@ -140,7 +140,7 @@ describe('parseAwgDump (synthetic edge cases)', () => {
     ].join('\t')
 
     const dump = `${interfaceLine}\n${peerLine}`
-    const [peer] = parseAwgDump(dump, 'awg0').peers
+    const peer = parseAwgDump(dump, 'awg0').peers[0]!
 
     expect(peer.allowedIps).toEqual(['10.9.0.2/32', 'fd00::2/128'])
   })
