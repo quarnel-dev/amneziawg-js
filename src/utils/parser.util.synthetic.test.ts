@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseAwgDump } from './parser.util'
+import { parseAwgDump } from './parser.util.js'
 
 describe('parseAwgDump (synthetic edge cases)', () => {
   it('parses interface line WITH interface name prefix', () => {
@@ -87,7 +87,7 @@ describe('parseAwgDump (synthetic edge cases)', () => {
     ].join('\t')
 
     const dump = `${interfaceLine}\n${peerLine}`
-    const [peer] = parseAwgDump(dump, 'awg0').peers
+    const peer = parseAwgDump(dump, 'awg0').peers[0]!
 
     expect(peer.endpoint).toBe('203.0.113.10:51820')
     expect(peer.latestHandshake).toEqual(new Date(handshakeUnix * 1000))

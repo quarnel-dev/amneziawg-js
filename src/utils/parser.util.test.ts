@@ -1,6 +1,6 @@
 // src/utils/parser.utils.test.ts
 import { describe, it, expect } from 'vitest'
-import { parseAwgDump } from './parser.util'
+import { parseAwgDump } from './parser.util.js'
 
 const INTERFACE_LINE = [
   'MENZwC2GFlXO4H1HLNkfimgGIQzVRx+/Hk1MOy6qJkU=', // privateKey
