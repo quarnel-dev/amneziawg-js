@@ -2,7 +2,7 @@ import { execFileAsync } from './utils/exec.util.js'
 import { parseAwgDump } from './utils/parser.util.js'
 import { AmneziaWGError, InvalidKeyError, PeerAlreadyExistsError, PeerNotFoundError } from './errors/index.js'
 
-import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus, AddPeerOptions } from './types/index.js'
+import type { AmneziaWGOptions, KeyPair, InterfaceStatus, PeerStatus, AddPeerOptions, UpdatePeerOptions } from './types/index.js'
 import type { ExecOptions } from './types/exec.types.js'
 
 const KEY_RE = /^[A-Za-z0-9+/]{43}=$/
@@ -96,6 +96,42 @@ export class AmneziaWG {
     if (!created) throw new AmneziaWGError('Peer was added but could not be found afterwards')
 
     return created
+  }
+
+  async updatePeer(options: UpdatePeerOptions): Promise<PeerStatus> {
+    const peerKey = this.assertKey(options.publicKey, 'peer public key')
+
+    const existing = await this.getPeer(peerKey)
+    if (!existing) throw new PeerNotFoundError(peerKey)
+
+    const args = ['set', this.interface, 'peer', peerKey]
+
+    if (options.presharedKey !== undefined) {
+      args.push('preshared-key', options.presharedKey === null ? 'none' : this.assertKey(options.presharedKey, 'preshared key'))
+    }
+
+    if (options.endpoint) {
+      args.push('endpoint', options.endpoint)
+    }
+
+    if (options.persistentKeepalive !== undefined) {
+      args.push('persistent-keepalive', String(options.persistentKeepalive))
+    }
+
+    if (options.allowedIps) {
+      args.push('allowed-ips', options.allowedIps.length === 0 ? 'none' : options.allowedIps.join(','))
+    }
+
+    if (options.advancedSecurity !== undefined) {
+      args.push('advanced-security', options.advancedSecurity)
+    }
+
+    await this.runAwg(args)
+
+    const updated = await this.getPeer(peerKey)
+    if (!updated) throw new AmneziaWGError('Peer was updated but could not be found afterwards')
+
+    return updated
   }
 
   async removePeer(publicKey: string): Promise<void> {
