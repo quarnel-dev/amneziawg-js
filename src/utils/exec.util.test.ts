@@ -45,11 +45,7 @@ describe('execFileAsync (without input, uses execFile)', () => {
     const result = await execFileAsync('awg', ['show'])
 
     expect(result).toEqual({ stdout: 'ok output', stderr: '' })
-    expect(execFileCustomImpl).toHaveBeenCalledWith(
-      'awg',
-      ['show'],
-      expect.objectContaining({ windowsHide: true })
-    )
+    expect(execFileCustomImpl).toHaveBeenCalledWith('awg', ['show'], expect.objectContaining({ windowsHide: true }))
   })
 
   it('wraps a failure into ExecError with exitCode/stdout/stderr', async () => {

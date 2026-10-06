@@ -359,9 +359,9 @@ describe('AmneziaWG', () => {
     it('throws InvalidKeyError for a malformed presharedKey', async () => {
       execFileAsyncMock.mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
 
-      await expect(
-        awg.updatePeer({ publicKey: VALID_PEER_KEY, presharedKey: 'malformed-psk' })
-      ).rejects.toBeInstanceOf(InvalidKeyError)
+      await expect(awg.updatePeer({ publicKey: VALID_PEER_KEY, presharedKey: 'malformed-psk' })).rejects.toBeInstanceOf(
+        InvalidKeyError
+      )
     })
 
     it('throws AmneziaWGError if the peer disappeared after update', async () => {
@@ -374,7 +374,9 @@ describe('AmneziaWG', () => {
     })
 
     describe('argument building', () => {
-      async function updatePeerAndCaptureSetArgs(options: Omit<Parameters<typeof awg.updatePeer>[0], 'publicKey'>): Promise<string[]> {
+      async function updatePeerAndCaptureSetArgs(
+        options: Omit<Parameters<typeof awg.updatePeer>[0], 'publicKey'>
+      ): Promise<string[]> {
         execFileAsyncMock
           .mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
           .mockResolvedValueOnce(okResult(''))
@@ -463,4 +465,3 @@ describe('AmneziaWG', () => {
     })
   })
 })
-
