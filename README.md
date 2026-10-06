@@ -17,6 +17,14 @@ This project is **not affiliated with or endorsed by the Amnezia team** — it's
 - Typed interface & peer status, parsed from `awg show <interface> dump` (including AmneziaWG-specific obfuscation parameters: `Jc`/`Jmin`/`Jmax`, `S1-S4`, `H1-H4`, `HeaderProtectionKey`)
 - Typed errors for common failure cases (invalid key format, duplicate/missing peer)
 
+## Installation
+
+```bash
+npm install amneziawg
+```
+
+View on [npm](https://www.npmjs.com/package/amneziawg).
+
 ## Usage
 
 ```ts

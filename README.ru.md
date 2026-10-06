@@ -17,6 +17,14 @@
 - Типизированный статус интерфейса и peer'ов, парсится из `awg show <interface> dump` (включая специфичные для AmneziaWG параметры обфускации: `Jc`/`Jmin`/`Jmax`, `S1-S4`, `H1-H4`, `HeaderProtectionKey`)
 - Типизированные ошибки для типовых ситуаций (неверный формат ключа, дублирующийся/отсутствующий peer)
 
+## Установка
+
+```bash
+npm install amneziawg
+```
+
+Страница на [npm](https://www.npmjs.com/package/amneziawg).
+
 ## Использование
 
 ```ts
