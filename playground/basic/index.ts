@@ -1,4 +1,4 @@
-import { AmneziaWG, PeerAlreadyExistsError, PeerNotFoundError } from 'amneziawg'
+import { AmneziaWG, PeerAlreadyExistsError, PeerNotFoundError, isPeerActive } from 'amneziawg'
 
 async function main() {
   console.log('Starting AmneziaWG playground testing...')
@@ -37,9 +37,12 @@ async function main() {
 
       const peer = await awg.getPeer(targetPublicKey)
       console.dir(peer, { depth: null, colors: true })
+      if (peer) {
+        console.log(`Is first peer active?:`, isPeerActive(peer))
+      }
     }
 
-    console.log('\n--- Testing Mutating Methods (addPeer / removePeer) ---')
+    console.log('\n--- Testing Mutating Methods (addPeer / updatePeer / removePeer) ---')
 
     const testPeerKeys = await awg.generateKeys()
     console.log('Generated test peer public key:', testPeerKeys.publicKey)
@@ -52,6 +55,17 @@ async function main() {
     })
     console.log('Peer added successfully, returned status:')
     console.dir(addedPeer, { depth: null, colors: true })
+    console.log('Is newly added peer active?:', isPeerActive(addedPeer))
+
+    console.log('\nUpdating test peer (changing allowedIps & persistentKeepalive)...')
+    const updatedPeer = await awg.updatePeer({
+      publicKey: testPeerKeys.publicKey,
+      allowedIps: ['10.9.0.100/32', '10.9.0.101/32'],
+      persistentKeepalive: 25,
+    })
+    console.log('Peer updated successfully, returned status:')
+    console.dir(updatedPeer, { depth: null, colors: true })
+
 
     console.log('\n--- Testing PeerAlreadyExistsError ---')
     try {
