@@ -1,4 +1,3 @@
-// src/utils/parser.utils.test.ts
 import { describe, it, expect } from 'vitest'
 import { parseAwgDump } from './parser.util.js'
 
