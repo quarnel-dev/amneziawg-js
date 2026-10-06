@@ -341,6 +341,105 @@ describe('AmneziaWG', () => {
     })
   })
 
+  describe('updatePeer', () => {
+    const awg = new AmneziaWG({ interface: 'awg0' })
+
+    it('throws InvalidKeyError when public key format is invalid', async () => {
+      await expect(awg.updatePeer({ publicKey: 'invalid-key' })).rejects.toBeInstanceOf(InvalidKeyError)
+      expect(execFileAsyncMock).not.toHaveBeenCalled()
+    })
+
+    it('throws PeerNotFoundError when the peer does not exist', async () => {
+      execFileAsyncMock.mockResolvedValueOnce(okResult(dumpWithoutPeer()))
+
+      await expect(awg.updatePeer({ publicKey: VALID_PEER_KEY })).rejects.toBeInstanceOf(PeerNotFoundError)
+      expect(execFileAsyncMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('throws InvalidKeyError for a malformed presharedKey', async () => {
+      execFileAsyncMock.mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
+
+      await expect(
+        awg.updatePeer({ publicKey: VALID_PEER_KEY, presharedKey: 'malformed-psk' })
+      ).rejects.toBeInstanceOf(InvalidKeyError)
+    })
+
+    it('throws AmneziaWGError if the peer disappeared after update', async () => {
+      execFileAsyncMock
+        .mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
+        .mockResolvedValueOnce(okResult(''))
+        .mockResolvedValueOnce(okResult(dumpWithoutPeer()))
+
+      await expect(awg.updatePeer({ publicKey: VALID_PEER_KEY })).rejects.toBeInstanceOf(AmneziaWGError)
+    })
+
+    describe('argument building', () => {
+      async function updatePeerAndCaptureSetArgs(options: Omit<Parameters<typeof awg.updatePeer>[0], 'publicKey'>): Promise<string[]> {
+        execFileAsyncMock
+          .mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
+          .mockResolvedValueOnce(okResult(''))
+          .mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
+
+        await awg.updatePeer({ publicKey: VALID_PEER_KEY, ...options })
+
+        const call = execFileAsyncMock.mock.calls[1]
+        return call![1] as string[]
+      }
+
+      it('builds base args with interface and peer key', async () => {
+        const args = await updatePeerAndCaptureSetArgs({})
+        expect(args).toEqual(['set', 'awg0', 'peer', VALID_PEER_KEY])
+      })
+
+      it('appends preshared-key when provided', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ presharedKey: VALID_PRESHARED_KEY })
+        expect(args).toEqual(['set', 'awg0', 'peer', VALID_PEER_KEY, 'preshared-key', VALID_PRESHARED_KEY])
+      })
+
+      it('appends preshared-key "none" when null', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ presharedKey: null })
+        expect(args).toEqual(['set', 'awg0', 'peer', VALID_PEER_KEY, 'preshared-key', 'none'])
+      })
+
+      it('appends endpoint when provided', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ endpoint: '198.51.100.1:51820' })
+        expect(args).toEqual(['set', 'awg0', 'peer', VALID_PEER_KEY, 'endpoint', '198.51.100.1:51820'])
+      })
+
+      it('stringifies persistentKeepalive', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ persistentKeepalive: 25 })
+        expect(args[args.indexOf('persistent-keepalive') + 1]).toBe('25')
+      })
+
+      it('joins allowedIps with commas', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ allowedIps: ['10.9.0.2/32', 'fd00::2/128'] })
+        expect(args[args.indexOf('allowed-ips') + 1]).toBe('10.9.0.2/32,fd00::2/128')
+      })
+
+      it('uses "none" when allowedIps is an empty array', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ allowedIps: [] })
+        expect(args[args.indexOf('allowed-ips') + 1]).toBe('none')
+      })
+
+      it('passes advancedSecurity through as-is', async () => {
+        const args = await updatePeerAndCaptureSetArgs({ advancedSecurity: 'on' })
+        expect(args[args.indexOf('advanced-security') + 1]).toBe('on')
+      })
+    })
+
+    describe('happy path', () => {
+      it('returns the updated peer status', async () => {
+        execFileAsyncMock
+          .mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
+          .mockResolvedValueOnce(okResult(''))
+          .mockResolvedValueOnce(okResult(dumpWithPeer(VALID_PEER_KEY)))
+
+        const peer = await awg.updatePeer({ publicKey: VALID_PEER_KEY, endpoint: '1.2.3.4:51820' })
+        expect(peer.publicKey).toBe(VALID_PEER_KEY)
+      })
+    })
+  })
+
   describe('removePeer', () => {
     const awg = new AmneziaWG({ interface: 'awg0' })
 
@@ -364,3 +463,4 @@ describe('AmneziaWG', () => {
     })
   })
 })
+
