@@ -11,3 +11,12 @@ export interface AddPeerOptions {
   allowedIps?: string[]
   advancedSecurity?: 'on' | 'off'
 }
+
+export interface UpdatePeerOptions {
+  presharedKey?: string | null
+  endpoint?: string
+  persistentKeepalive?: number | 'off'
+  allowedIps?: string[]
+  advancedSecurity?: 'on' | 'off'
+}
+
