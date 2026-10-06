@@ -12,14 +12,15 @@ This project is **not affiliated with or endorsed by the Amnezia team** — it's
 
 - Check if the AmneziaWG CLI is installed
 - Generate key pairs and preshared keys
-- Add, remove, and query peers
+- Add, update, remove, and query peers
+- Check peer online activity status (`isPeerActive`)
 - Typed interface & peer status, parsed from `awg show <interface> dump` (including AmneziaWG-specific obfuscation parameters: `Jc`/`Jmin`/`Jmax`, `S1-S4`, `H1-H4`, `HeaderProtectionKey`)
 - Typed errors for common failure cases (invalid key format, duplicate/missing peer)
 
 ## Usage
 
 ```ts
-import { AmneziaWG, PeerAlreadyExistsError } from 'amneziawg';
+import { AmneziaWG, PeerAlreadyExistsError, isPeerActive } from 'amneziawg';
 
 const awg = new AmneziaWG({ interface: 'awg0' });
 
@@ -43,9 +44,21 @@ try {
   }
 }
 
+// Update existing peer on the fly
+await awg.updatePeer({
+  publicKey: keys.publicKey,
+  allowedIps: ['10.9.0.2/32', '10.9.0.3/32'],
+  persistentKeepalive: 25,
+});
+
 const status = await awg.getStatus();
 const peers = await awg.getPeers();
 const singlePeer = await awg.getPeer(keys.publicKey);
+
+// Check if peer is active (had handshake within last 180 seconds)
+if (singlePeer && isPeerActive(singlePeer)) {
+  console.log('Peer is active');
+}
 
 await awg.removePeer(keys.publicKey);
 ```
@@ -72,10 +85,10 @@ try {
 
 - Linux with `awg` installed ([official install guide](https://docs.amnezia.org/))
 - Node.js >= 20
-- Root/sudo for commands that manage the interface (`addPeer`, `removePeer`)
+- Root/sudo for commands that manage the interface (`addPeer`, `updatePeer`, `removePeer`)
 
 ## Status
 
-Available on npm as `0.1.0`. Interface up/down management, config file generation, and QR code helpers are planned for later versions.
+Available on npm as `0.2.0`. Interface up/down management, config file generation, and QR code helpers are planned for later versions.
 
-*Made with ❤️ by Quarnel*
+*Made with ❤️ by Quarnel*

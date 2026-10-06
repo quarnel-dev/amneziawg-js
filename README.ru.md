@@ -12,14 +12,15 @@
 
 - Проверка, установлен ли AmneziaWG CLI
 - Генерация пар ключей и preshared-ключей
-- Добавление, удаление и получение информации о peer'ах
+- Добавление, обновление, удаление и получение информации о peer'ах
+- Проверка онлайн-активности peer'а (`isPeerActive`)
 - Типизированный статус интерфейса и peer'ов, парсится из `awg show <interface> dump` (включая специфичные для AmneziaWG параметры обфускации: `Jc`/`Jmin`/`Jmax`, `S1-S4`, `H1-H4`, `HeaderProtectionKey`)
 - Типизированные ошибки для типовых ситуаций (неверный формат ключа, дублирующийся/отсутствующий peer)
 
 ## Использование
 
 ```ts
-import { AmneziaWG, PeerAlreadyExistsError } from 'amneziawg'
+import { AmneziaWG, PeerAlreadyExistsError, isPeerActive } from 'amneziawg'
 
 const awg = new AmneziaWG({ interface: 'awg0' })
 
@@ -43,9 +44,21 @@ try {
   }
 }
 
+// Обновление существующего peer'а на лету
+await awg.updatePeer({
+  publicKey: keys.publicKey,
+  allowedIps: ['10.9.0.2/32', '10.9.0.3/32'],
+  persistentKeepalive: 25,
+})
+
 const status = await awg.getStatus()
 const peers = await awg.getPeers()
 const singlePeer = await awg.getPeer(keys.publicKey)
+
+// Проверка активности peer'а (был ли handshake за последние 180 секунд)
+if (singlePeer && isPeerActive(singlePeer)) {
+  console.log('Peer активен')
+}
 
 await awg.removePeer(keys.publicKey)
 ```
@@ -72,10 +85,11 @@ try {
 
 - Linux с установленным `awg` ([официальная инструкция по установке](https://docs.amnezia.org/))
 - Node.js >= 20
-- Root/sudo для команд, управляющих интерфейсом (`addPeer`, `removePeer`)
+- Root/sudo для команд, управляющих интерфейсом (`addPeer`, `updatePeer`, `removePeer`)
 
 ## Статус
 
-Доступно в npm как `0.1.0`. Управление интерфейсом (up/down), генерация конфигов и QR-кодов запланированы на будущие версии.
+Доступно в npm как `0.2.0`. Управление интерфейсом (up/down), генерация конфигов и QR-кодов запланированы на будущие версии.
 
 _Сделано с ❤️ от Quarnel_
+
